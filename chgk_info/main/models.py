@@ -58,7 +58,7 @@ class TournamentBaseModel(models.Model):
 
 
 class Synchronous(TournamentBaseModel):
-    question_file = models.FileField()
+    question_file = models.FileField(upload_to='media')
 
     class Meta:
         verbose_name = 'Синхрон'

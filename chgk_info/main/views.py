@@ -1,5 +1,6 @@
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
+from rest_framework import viewsets
 from rest_framework.parsers import JSONParser
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -106,5 +107,76 @@ class PlayerDetailView(APIView):
         return Response(status=204)
 
 
+class TournamentBaseViewSet(viewsets.ViewSet):
 
+    def list(self, request):
+        queryset = TournamentBaseModel.objects.all()
+        serializer = TournamentBaseModelSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk):
+        queryset = TournamentBaseModel.objects.all()
+        tournament = get_object_or_404(queryset, pk=pk)
+        serializer = TournamentBaseModelSerializer(tournament)
+        return Response(serializer.data)
+
+    def delete(self, request, pk):
+        queryset = TournamentBaseModel.objects.all()
+        tournament = get_object_or_404(queryset, pk=pk)
+        tournament.delete()
+        return Response(status=204)
+
+
+class SynchronousViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        queryset = Synchronous.objects.all()
+        serializer = SynchronousSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk):
+        queryset = Synchronous.objects.all()
+        synchron = get_object_or_404(queryset, pk=pk)
+        serializer = TournamentBaseModelSerializer(synchron)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = SynchronousSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, pk):
+        queryset = Synchronous.objects.all()
+        synchron = get_object_or_404(queryset, pk=pk)
+        synchron.delete()
+        return Response(status=204)
+
+
+class CupViewSet(viewsets.ViewSet):
+
+    def list(self, request):
+        queryset = Cup.objects.all()
+        serializer = CupSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk):
+        queryset = Cup.objects.all()
+        cup = get_object_or_404(queryset, pk=pk)
+        serializer = TournamentBaseModelSerializer(cup)
+        return Response(serializer.data)
+
+    def create(self, request):
+        serializer = CupSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    def delete(self, request, pk):
+        queryset = Cup.objects.all()
+        cup = get_object_or_404(queryset, pk=pk)
+        cup.delete()
+        return Response(status=204)
 
