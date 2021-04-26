@@ -107,8 +107,27 @@ class PlayerDetailView(APIView):
         return Response(status=204)
 
 
-class TournamentBaseViewSet(viewsets.ViewSet):
+class ChgkUserViewSet(viewsets.ViewSet):
+    def create(self, request):
+        serializer = ChgkUserRegistrationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
 
+    def list(self, request):
+        queryset = ChgkUser.objects.all()
+        serializer = ChgkUserSerializer(queryset, many=True)
+        return Response(serializer.data)
+
+    def retrieve(self, request, pk):
+        queryset = ChgkUser.objects.all()
+        user = get_object_or_404(queryset, pk=pk)
+        serializer = ChgkUserSerializer(user)
+        return Response(serializer.data)
+
+
+class TournamentBaseViewSet(viewsets.ViewSet):
     def list(self, request):
         queryset = TournamentBaseModel.objects.all()
         serializer = TournamentBaseModelSerializer(queryset, many=True)
@@ -128,7 +147,6 @@ class TournamentBaseViewSet(viewsets.ViewSet):
 
 
 class SynchronousViewSet(viewsets.ViewSet):
-
     def list(self, request):
         queryset = Synchronous.objects.all()
         serializer = SynchronousSerializer(queryset, many=True)
@@ -155,7 +173,6 @@ class SynchronousViewSet(viewsets.ViewSet):
 
 
 class CupViewSet(viewsets.ViewSet):
-
     def list(self, request):
         queryset = Cup.objects.all()
         serializer = CupSerializer(queryset, many=True)
@@ -180,3 +197,13 @@ class CupViewSet(viewsets.ViewSet):
         cup.delete()
         return Response(status=204)
 
+
+# class ApplicationViewSet(viewsets.ViewSet):
+#     def create(self, request, pk):
+#         queryset = Synchronous.objects.all()
+#         synchron = get_object_or_404(queryset, pk=pk)
+#         queryset = Application.objects.create()
+#         if serializer.is_valid():
+#             serializer.save()
+#             return Response(serializer.data)
+#         return Response(serializer.errors, status=400)
