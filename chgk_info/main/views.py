@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.parsers import JSONParser
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse, Http404
@@ -198,12 +199,22 @@ class CupViewSet(viewsets.ViewSet):
         return Response(status=204)
 
 
-# class ApplicationViewSet(viewsets.ViewSet):
-#     def create(self, request, pk):
-#         queryset = Synchronous.objects.all()
-#         synchron = get_object_or_404(queryset, pk=pk)
-#         queryset = Application.objects.create()
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data)
-#         return Response(serializer.errors, status=400)
+class ApplicationViewSet(viewsets.ViewSet):
+    permission_classes_by_action = {'create': [IsAuthenticated], 'list': [AllowAny]}
+
+    def create(self, request, pk):
+        queryset = Synchronous.objects.all()
+        synchron = get_object_or_404(queryset, pk=pk)
+        user = request.user
+        request.data["representative"] = user.id
+        request.data["synchron"] = pk
+        serializer = ApplicationSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=400)
+
+    def list(self, request, pk):
+        queryset = Application.objects.filter(synchron=pk)
+        serializer = ApplicationSerializer(queryset, many=True)
+        return Response(serializer.data)

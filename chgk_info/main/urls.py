@@ -15,7 +15,7 @@ urlpatterns = [
     path('tournaments/<int:pk>/', TournamentBaseViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
     path('synchrons/', SynchronousViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('synchrons/<int:pk>/', SynchronousViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
-    # path('synchrons/<int:pk>/applications', ),
+    path('synchrons/<int:pk>/applications/', ApplicationViewSet.as_view({'post': 'create', 'get': 'list'})),
     path('cups/', CupViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('cups/<int:pk>/', CupViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
     path('users/', ChgkUserViewSet.as_view({'get': 'list'})),
