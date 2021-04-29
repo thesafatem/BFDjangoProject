@@ -218,3 +218,21 @@ class ApplicationViewSet(viewsets.ViewSet):
         queryset = Application.objects.filter(synchron=pk)
         serializer = ApplicationSerializer(queryset, many=True)
         return Response(serializer.data)
+
+
+class ProfileViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated,)
+
+    def retrieve(self, request):
+        app_queryset = Application.objects.select_related().filter(host=request.user.id)
+        app_serializer = ApplicationSerializer(app_queryset, many=True)
+        synchron_ids = []
+        for x in app_serializer.data:
+            synchron_ids.append(x['synchron'])
+        sync_queryset = Synchronous.objects.filter(id__in = synchron_ids)
+        sync_serializer = SynchronousSerializer(sync_queryset, many=True)
+        user_queryset = ChgkUser.objects.get(id=request.user.id)
+        user_serializer = ChgkUserSerializer(user_queryset)
+        y = user_serializer.data
+        y['files'] = [x['question_file'] for x in sync_serializer.data]
+        return Response(y)

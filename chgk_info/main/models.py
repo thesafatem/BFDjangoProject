@@ -158,3 +158,6 @@ class Application(models.Model):
     class Meta:
         verbose_name = 'Заявка'
         verbose_name_plural = 'Заявки'
+
+    def __str__(self):
+        return self.synchron.__str__() + ' ' + self.representative.__str__() + ' ' + self.host.__str__()
