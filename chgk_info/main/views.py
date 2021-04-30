@@ -3,11 +3,13 @@ from django.views.decorators.csrf import csrf_exempt
 from rest_framework import viewsets
 from rest_framework.parsers import JSONParser
 from rest_framework.permissions import IsAuthenticated, AllowAny
+from rest_framework.utils import json
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.http import HttpResponse, JsonResponse, Http404
 from .models import *
 from .serializers import *
+from openpyxl import load_workbook
 # Create your views here.
 
 
@@ -236,3 +238,31 @@ class ProfileViewSet(viewsets.ViewSet):
         y = user_serializer.data
         y['files'] = [x['question_file'] for x in sync_serializer.data]
         return Response(y)
+
+
+class CheckUpload(viewsets.ViewSet):
+    def create(self, request):
+        file = load_workbook(request.FILES['myfile'])
+        score_sheet = file.get_sheet_by_name('Score')
+        print(score_sheet['A1'].value, score_sheet['B1'].value)
+        row = 1
+        score_by_team = {}
+        while True:
+            if score_sheet[f'A{row}'].value is None:
+                break
+            else:
+                team_id = score_sheet[f'A{row}'].value
+                team_name = score_sheet[f'B{row}'].value
+                tour_no = score_sheet[f'C{row}'].value
+                column = 3
+                while True:
+                    value = score_sheet[f'''{chr(column + ord('A'))}{row}'''].value
+                    if value is None:
+                        break
+                    else:
+                        if score_by_team.get(team_name) is None:
+                            score_by_team[team_name] = 0
+                        score_by_team[team_name] += value
+                    column += 1
+                row += 1
+        return Response(score_by_team)

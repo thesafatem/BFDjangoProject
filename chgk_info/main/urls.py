@@ -20,5 +20,6 @@ urlpatterns = [
     path('cups/<int:pk>/', CupViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
     path('users/', ChgkUserViewSet.as_view({'get': 'list'})),
     path('users/<int:pk>/', ChgkUserViewSet.as_view({'get': 'retrieve'})),
-    path('profile/', ProfileViewSet.as_view({'get': 'retrieve'}))
+    path('profile/', ProfileViewSet.as_view({'get': 'retrieve'})),
+    path('file/', CheckUpload.as_view({'post': 'create'}))
 ]
