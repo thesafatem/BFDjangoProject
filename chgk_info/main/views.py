@@ -240,11 +240,17 @@ class ProfileViewSet(viewsets.ViewSet):
         return Response(y)
 
 
-class CheckUpload(viewsets.ViewSet):
-    def create(self, request):
-        file = load_workbook(request.FILES['myfile'])
-        score_sheet = file.get_sheet_by_name('Score')
-        print(score_sheet['A1'].value, score_sheet['B1'].value)
+class SynchronUploadViewSet(viewsets.ViewSet):
+    permission_classes = (IsAuthenticated,)
+
+    def create(self, request, pk):
+        queryset = Synchronous.objects.all()
+        synchron = get_object_or_404(queryset, pk=pk)
+        representative = request.user
+        queryset = Application.objects.all()
+        application = get_object_or_404(queryset, synchron=synchron, representative=representative, status=False)
+        file = load_workbook(request.FILES['results'])
+        score_sheet = file.worksheets[0]
         row = 1
         score_by_team = {}
         while True:
@@ -253,16 +259,75 @@ class CheckUpload(viewsets.ViewSet):
             else:
                 team_id = score_sheet[f'A{row}'].value
                 team_name = score_sheet[f'B{row}'].value
-                tour_no = score_sheet[f'C{row}'].value
-                column = 3
+                team_city = score_sheet[f'C{row}'].value
+                tour_no = score_sheet[f'D{row}'].value
+                if score_by_team.get(team_name) is None:
+                    score_by_team[team_name] = {
+                        'id': team_id,
+                        'tct_id': None,
+                        'city': team_city,
+                        'results': {}
+                    }
+                column = 4
                 while True:
                     value = score_sheet[f'''{chr(column + ord('A'))}{row}'''].value
                     if value is None:
                         break
                     else:
-                        if score_by_team.get(team_name) is None:
-                            score_by_team[team_name] = 0
-                        score_by_team[team_name] += value
+                        if score_by_team[team_name]['results'].get(tour_no) is None:
+                            score_by_team[team_name]['results'][tour_no] = 0
+                        score_by_team[team_name]['results'][tour_no] += value
                     column += 1
-                row += 1
+            row += 1
+        for name, val in score_by_team.items():
+            if val.get('id') == 0:
+                try:
+                    city = City.objects.get(name=val.get('city'))
+                except City.DoesNotExist:
+                    city = City.objects.create(name=val.get('city'))
+                new_team = Team.objects.create(name=name, rating=0, city=city)
+                val['id'] = new_team.id
+            team = Team.objects.get(id=val['id'])
+            tct = TournamentCompetitorsTeams.objects.create(
+                tournament=synchron,
+                team=team,
+                alias_name=(name if team.name != name else None),
+                results=val['results']
+            )
+            score_by_team[name]['tct_id'] = tct.id
+
+        file = load_workbook(request.FILES['teams'])
+        teams_sheet = file.worksheets[0]
+        row = 1
+        while True:
+            if teams_sheet[f'A{row}'].value is None:
+                break
+            else:
+                team_id = teams_sheet[f'A{row}'].value
+                team_name = teams_sheet[f'B{row}'].value
+                team_city = teams_sheet[f'C{row}'].value
+                player_type = teams_sheet[f'D{row}'].value
+                player_id = teams_sheet[f'E{row}'].value
+                player_first_name = teams_sheet[f'F{row}'].value
+                player_last_name = teams_sheet[f'G{row}'].value
+                if team_id == 0:
+                    team_id = score_by_team[team_name]['id']
+                try:
+                    city = City.objects.get(name=team_city)
+                except City.DoesNotExist:
+                    city = City.objects.create(name=team_city)
+                if player_id == 0:
+                    team = Team.objects.get(id=team_id)
+                    if player_type == 'Л':
+                        city = None
+                        team = None
+                    player = Player.objects.create(
+                        firstname=player_first_name,
+                        lastname=player_last_name,
+                        city=city,
+                        team=team,
+                        rating=0
+                    )
+            row += 1
+        Application.objects.filter(synchron=synchron, representative=representative, status=False).update(status=True)
         return Response(score_by_team)

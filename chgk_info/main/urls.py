@@ -16,10 +16,10 @@ urlpatterns = [
     path('synchrons/', SynchronousViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('synchrons/<int:pk>/', SynchronousViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
     path('synchrons/<int:pk>/applications/', ApplicationViewSet.as_view({'post': 'create', 'get': 'list'})),
+    path('synchrons/<int:pk>/upload/', SynchronUploadViewSet.as_view({'post': 'create'})),
     path('cups/', CupViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('cups/<int:pk>/', CupViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
     path('users/', ChgkUserViewSet.as_view({'get': 'list'})),
     path('users/<int:pk>/', ChgkUserViewSet.as_view({'get': 'retrieve'})),
-    path('profile/', ProfileViewSet.as_view({'get': 'retrieve'})),
-    path('file/', CheckUpload.as_view({'post': 'create'}))
+    path('profile/', ProfileViewSet.as_view({'get': 'retrieve'}))
 ]

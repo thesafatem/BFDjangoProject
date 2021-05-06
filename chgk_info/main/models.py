@@ -127,7 +127,8 @@ class Cup(TournamentBaseModel):
 class TournamentCompetitorsTeams(models.Model):
     tournament = models.ForeignKey(TournamentBaseModel, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
-    alias_name = models.CharField(max_length=255)
+    alias_name = models.CharField(max_length=255, null=True)
+    results = models.JSONField(default=None)
 
     class Meta:
         verbose_name = 'Команда-участница'
