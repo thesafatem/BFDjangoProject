@@ -19,6 +19,7 @@ urlpatterns = [
     path('synchrons/<int:pk>/upload/', SynchronUploadViewSet.as_view({'post': 'create'})),
     path('cups/', CupViewSet.as_view({'get': 'list', 'post': 'create'})),
     path('cups/<int:pk>/', CupViewSet.as_view({'get': 'retrieve', 'delete': 'delete'})),
+    path('cups/<int:pk>/upload/', CupUploadViewSet.as_view({'post': 'create'})),
     path('users/', ChgkUserViewSet.as_view({'get': 'list'})),
     path('users/<int:pk>/', ChgkUserViewSet.as_view({'get': 'retrieve'})),
     path('profile/', ProfileViewSet.as_view({'get': 'retrieve'}))

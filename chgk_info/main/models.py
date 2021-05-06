@@ -118,6 +118,7 @@ class Synchronous(TournamentBaseModel):
 
 class Cup(TournamentBaseModel):
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
+    posted_by = models.ForeignKey(ChgkUser, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = 'Очник'
