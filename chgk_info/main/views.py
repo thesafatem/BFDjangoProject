@@ -363,3 +363,12 @@ class CupUploadViewSet(viewsets.ViewSet):
         queryset = Cup.objects.filter(posted_by=request.user)
         cup = get_object_or_404(queryset, pk=pk)
         return file_parser(request, cup)
+
+
+class TournamentResultsViewSet(viewsets.ViewSet):
+    def list(self, request, pk):
+        queryset = TournamentBaseModel.objects.all()
+        tournament = get_object_or_404(queryset, pk=pk)
+        queryset = TournamentCompetitorsTeams.objects.filter(tournament=tournament)
+        serializer = TournamentCompetitorsTeamsSerializer(queryset, many=True)
+        return Response(serializer.data)

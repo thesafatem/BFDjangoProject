@@ -39,6 +39,7 @@ class Player(models.Model):
     class Meta:
         verbose_name = 'Игрок'
         verbose_name_plural = 'Игроки'
+        ordering = ['firstname', 'lastname']
 
     def __str__(self):
         return self.firstname + ' ' + self.lastname
@@ -134,11 +135,18 @@ class Cup(TournamentBaseModel):
         verbose_name_plural = 'Очники'
 
 
+class TournamentCompetitorsTeamsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().order_by("-results__total")
+
+
 class TournamentCompetitorsTeams(models.Model):
     tournament = models.ForeignKey(TournamentBaseModel, on_delete=models.CASCADE)
     team = models.ForeignKey(Team, on_delete=models.CASCADE)
     alias_name = models.CharField(max_length=255, null=True)
     results = models.JSONField(default=None)
+
+    objects = TournamentCompetitorsTeamsManager()
 
     class Meta:
         verbose_name = 'Команда-участница'

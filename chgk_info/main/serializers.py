@@ -55,12 +55,6 @@ class ChgkUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'email', 'profile']
 
 
-class TournamentCompetitorsTeamsSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TournamentCompetitorsTeams
-        fields = '__all__'
-
-
 class TournamentBaseModelSerializer(serializers.ModelSerializer):
     def validate(self, data):
         if data['difficulty_level'] < 1:
@@ -78,21 +72,29 @@ class TournamentBaseModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentBaseModel
         validators = []
-        fields = '__all__'
+        exclude = ['deleted']
 
 
 class SynchronousSerializer(TournamentBaseModelSerializer):
     class Meta:
         model = Synchronous
         validators = []
-        fields = '__all__'
+        exclude = ['deleted']
 
 
 class CupSerializer(TournamentBaseModelSerializer):
     class Meta:
         model = Cup
         validators = []
-        fields = '__all__'
+        exclude = ['deleted']
+
+
+class TournamentCompetitorsTeamsSerializer(serializers.ModelSerializer):
+    team = TeamBaseSerializer()
+
+    class Meta:
+        model = TournamentCompetitorsTeams
+        exclude = ['id']
 
 
 class TournamentCompetitorsPlayersSerializer(serializers.ModelSerializer):
