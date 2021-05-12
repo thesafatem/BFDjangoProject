@@ -1,23 +1,35 @@
+from abc import ABC
+
 from rest_framework import serializers
 from .models import *
 
 
-class CitySerializer(serializers.ModelSerializer):
-    class Meta:
-        model = City
-        fields = '__all__'
+class CityBaseSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
 
 
-class TeamSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Team
-        fields = '__all__'
+class CitySerializer(CityBaseSerializer):
+    id = serializers.IntegerField(read_only=True)
+
+
+class TeamBaseSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
+
+
+class TeamSerializer(TeamBaseSerializer):
+    id = serializers.IntegerField(read_only=True)
+    city = CityBaseSerializer()
 
 
 class PlayerSerializer(serializers.ModelSerializer):
+    team = TeamBaseSerializer()
+    city = CityBaseSerializer()
+
     class Meta:
         model = Player
         fields = '__all__'
+
+        ordering = ('firstname',)
 
 
 class ChgkUserRegistrationSerializer(serializers.ModelSerializer):
@@ -43,27 +55,43 @@ class ChgkUserSerializer(serializers.ModelSerializer):
         fields = ['id', 'first_name', 'last_name', 'email', 'profile']
 
 
-class TournamentBaseModelSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = TournamentBaseModel
-        fields = '__all__'
-
-
-class SynchronousSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Synchronous
-        fields = '__all__'
-
-
-class CupSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Cup
-        fields = '__all__'
-
-
 class TournamentCompetitorsTeamsSerializer(serializers.ModelSerializer):
     class Meta:
         model = TournamentCompetitorsTeams
+        fields = '__all__'
+
+
+class TournamentBaseModelSerializer(serializers.ModelSerializer):
+    def validate(self, data):
+        if data['difficulty_level'] < 1:
+            raise serializers.ValidationError('Difficulty level is too low')
+        if data['difficulty_level'] > 10:
+            raise serializers.ValidationError('Difficulty is too high')
+        if not data['difficulty_level'].is_integer() and not (data['difficulty_level'] + 0.5).is_integer():
+            raise serializers.ValidationError('Difficulty is not of step 0.5')
+
+        if data['end_date'] < data['start_date']:
+            raise serializers.ValidationError('''End date can't exceed start date''')
+
+        return data
+
+    class Meta:
+        model = TournamentBaseModel
+        validators = []
+        fields = '__all__'
+
+
+class SynchronousSerializer(TournamentBaseModelSerializer):
+    class Meta:
+        model = Synchronous
+        validators = []
+        fields = '__all__'
+
+
+class CupSerializer(TournamentBaseModelSerializer):
+    class Meta:
+        model = Cup
+        validators = []
         fields = '__all__'
 
 

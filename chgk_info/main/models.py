@@ -93,12 +93,21 @@ class ChgkUser(AbstractUser):
         return self.email
 
 
+class TournamentBaseModelManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(deleted=False)
+
+
 class TournamentBaseModel(models.Model):
     name = models.CharField(max_length=255, null=False)
     number_of_questions = models.IntegerField()
+    questions_per_tour = models.JSONField()
     difficulty_level = models.FloatField()
     start_date = models.DateField()
     end_date = models.DateField()
+    deleted = models.BooleanField(default=False)
+
+    objects = TournamentBaseModelManager()
 
     class Meta:
         verbose_name = 'Соревнование'

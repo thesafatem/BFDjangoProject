@@ -145,8 +145,11 @@ class TournamentBaseViewSet(viewsets.ViewSet):
     def delete(self, request, pk):
         queryset = TournamentBaseModel.objects.all()
         tournament = get_object_or_404(queryset, pk=pk)
-        tournament.delete()
+        tournament.deleted = True
+        tournament.save()
         return Response(status=204)
+        # tournament.delete()
+        # return Response(status=204)
 
 
 class SynchronousViewSet(viewsets.ViewSet):
