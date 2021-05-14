@@ -145,3 +145,71 @@ REST_FRAMEWORK = {
 }
 
 STATIC_URL = '/static/'
+
+
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '%(levelname)s -- %(asctime)s: %(message)s',
+        },
+        'simple': {
+            'format': '%(levelname)s -- %(message)s'
+        }
+    },
+    'handlers': {
+        'city_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'city.log',
+            'formatter': 'verbose'
+        },
+        'team_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'team.log',
+            'formatter': 'verbose'
+        },
+        'player_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'player.log',
+            'formatter': 'verbose'
+        },
+        'auth_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'auth.log',
+            'formatter': 'verbose'
+        },
+        'tournament_handler': {
+            'level': 'DEBUG',
+            'class': 'logging.FileHandler',
+            'filename': 'tournament.log',
+            'formatter': 'verbose'
+        }
+    },
+    'loggers': {
+        'city': {
+            'handlers': ['city_handler'],
+            'level': 'DEBUG',
+        },
+        'team': {
+            'handlers': ['team_handler'],
+            'level': 'DEBUG',
+        },
+        'player': {
+            'handlers': ['player_handler'],
+            'level': 'DEBUG',
+        },
+        'auth_': {
+            'handlers': ['auth_handler'],
+            'level': 'DEBUG'
+        },
+        'tournament': {
+            'handlers': ['tournament_handler'],
+            'level': 'DEBUG'
+        }
+    },
+}

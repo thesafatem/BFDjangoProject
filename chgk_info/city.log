@@ -1,0 +1,4 @@
+INFO -- 2021-05-15 00:05:30,403: City (id = 4) created
+INFO -- 2021-05-15 00:09:56,425: {'name': [ErrorDetail(string='This field is required.', code='required')]}
+INFO -- 2021-05-15 00:11:37,816: City (id = 5) created
+INFO -- 2021-05-15 00:11:49,238: City (id = 5) deleted

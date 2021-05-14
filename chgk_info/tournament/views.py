@@ -1,3 +1,4 @@
+from django.http import Http404
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
@@ -10,68 +11,72 @@ from .serializers import TournamentBaseModelSerializer, RegularSerializer, CupSe
 from team.models import Team
 from city.models import City
 from player.models import Player
+
+import logging
+logger = logging.getLogger('tournament')
 # Create your views here.
 
 
 class TournamentBaseViewSet(viewsets.ViewSet):
+    permission_classes_by_action = {'list': [AllowAny], 'retrieve': [AllowAny], 'delete': [IsAuthenticated]}
+
+    def get_serialized_object(self, pk):
+        try:
+            return RegularSerializer(Regular.objects.get(pk=pk))
+        except Regular.DoesNotExist:
+            try:
+                return CupSerializer(Cup.objects.get(pk=pk))
+            except Cup.DoesNotExist:
+                raise Http404
+
     def list(self, request):
         queryset = TournamentBaseModel.objects.all()
         serializer = TournamentBaseModelSerializer(queryset, many=True)
         return Response(serializer.data)
 
     def retrieve(self, request, pk):
-        queryset = TournamentBaseModel.objects.all()
-        tournament = get_object_or_404(queryset, pk=pk)
-        serializer = TournamentBaseModelSerializer(tournament)
+        serializer = self.get_serialized_object(pk)
         return Response(serializer.data)
 
     def delete(self, request, pk):
         queryset = TournamentBaseModel.objects.all()
         tournament = get_object_or_404(queryset, pk=pk)
+        user = request.user
+        if tournament.posted_by != user:
+            logger.error(f'User (id = {user.id}) has no right to delete tournament (id = {tournament.id}, name = {tournament.name})')
+            return Response(status=403)
         tournament.deleted = True
         tournament.save()
+        logger.info(f'Tournament (id = {tournament.id}) deleted')
         return Response(status=204)
 
 
 class RegularViewSet(viewsets.ViewSet):
+    permission_classes_by_action = {'create': [IsAuthenticated], 'list': [AllowAny]}
+
     def list(self, request):
         queryset = Regular.objects.all()
         serializer = RegularSerializer(queryset, many=True)
         return Response(serializer.data)
 
-    def retrieve(self, request, pk):
-        queryset = Regular.objects.all()
-        regular = get_object_or_404(queryset, pk=pk)
-        serializer = TournamentBaseModelSerializer(regular)
-        return Response(serializer.data)
-
     def create(self, request):
+        user = request.user
+        request.data['posted_by'] = user.id
         serializer = RegularSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f'Regular tournament (id = {serializer.data["id"]}) created')
             return Response(serializer.data)
+        logger.error(serializer.errors)
         return Response(serializer.errors, status=400)
-
-    def delete(self, request, pk):
-        queryset = Regular.objects.all()
-        regular = get_object_or_404(queryset, pk=pk)
-        regular.delete()
-        return Response(status=204)
 
 
 class CupViewSet(viewsets.ViewSet):
-    permission_classes_by_action = {'create': [IsAuthenticated], 'list': [AllowAny],
-                                    'retrieve': [AllowAny], 'delete': [IsAuthenticated]}
+    permission_classes_by_action = {'create': [IsAuthenticated], 'list': [AllowAny]}
 
     def list(self, request):
         queryset = Cup.objects.all()
         serializer = CupSerializer(queryset, many=True)
-        return Response(serializer.data)
-
-    def retrieve(self, request, pk):
-        queryset = Cup.objects.all()
-        cup = get_object_or_404(queryset, pk=pk)
-        serializer = TournamentBaseModelSerializer(cup)
         return Response(serializer.data)
 
     def create(self, request):
@@ -80,14 +85,10 @@ class CupViewSet(viewsets.ViewSet):
         serializer = CupSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f'Cup tournament (id = {serializer.data["id"]}) created')
             return Response(serializer.data)
+        logger.error(serializer.errors)
         return Response(serializer.errors, status=400)
-
-    def delete(self, request, pk):
-        queryset = Cup.objects.all()
-        cup = get_object_or_404(queryset, pk=pk)
-        cup.delete()
-        return Response(status=204)
 
 
 class ApplicationViewSet(viewsets.ViewSet):
@@ -102,7 +103,9 @@ class ApplicationViewSet(viewsets.ViewSet):
         serializer = ApplicationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f'User (id = {user.id}) commit application for the tournament (id = {regular.id})')
             return Response(serializer.data)
+        logger.error(serializer.errors)
         return Response(serializer.errors, status=400)
 
     def list(self, request, pk):
@@ -189,8 +192,8 @@ def file_parser(request, tournament):
                     city = None
                     team = None
                 player = Player.objects.create(
-                    firstname=player_first_name,
-                    lastname=player_last_name,
+                    first_name=player_first_name,
+                    last_name=player_last_name,
                     city=city,
                     team=team,
                     rating=0
@@ -216,6 +219,7 @@ class RegularUploadViewSet(viewsets.ViewSet):
         queryset = Application.objects.all()
         application = get_object_or_404(queryset, regular=regular, representative=representative, status=False)
         Application.objects.filter(regular=regular, representative=representative, status=False).update(status=True)
+        logger.info(f'User (id = {request.user.id}) upload results for tournament (id = {regular.id})')
         return file_parser(request, regular)
 
 
@@ -225,6 +229,7 @@ class CupUploadViewSet(viewsets.ViewSet):
     def create(self, request, pk):
         queryset = Cup.objects.filter(posted_by=request.user)
         cup = get_object_or_404(queryset, pk=pk)
+        logger.info(f'User (id = {request.user.id}) upload results for tournament (id = {cup.id})')
         return file_parser(request, cup)
 
 

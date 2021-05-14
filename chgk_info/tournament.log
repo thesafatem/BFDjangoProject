@@ -1,0 +1,8 @@
+INFO -- 2021-05-15 03:38:17,949: Regular tournament (id = 8) created
+INFO -- 2021-05-15 03:39:02,496: Cup tournament (id = 9) created
+INFO -- 2021-05-15 03:40:08,122: Tournament (id = 9) deleted
+INFO -- 2021-05-15 03:40:39,526: Tournament (id = 8) deleted
+INFO -- 2021-05-15 03:53:42,783: User (id = 2) commit application for the tournament (id = 5)
+INFO -- 2021-05-15 04:03:08,485: User (id = 2) upload results for tournament (id = 5)
+INFO -- 2021-05-15 04:15:06,730: User (id = 2) commit application for the tournament (id = 5)
+INFO -- 2021-05-15 04:15:49,910: User (id = 2) upload results for tournament (id = 5)

@@ -20,7 +20,7 @@ class ChgkUserRegistrationSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = ChgkUser
-        fields = ['first_name', 'last_name', 'email', 'password', 'profile']
+        fields = ['id', 'first_name', 'last_name', 'email', 'password', 'profile']
         validators = []
 
 

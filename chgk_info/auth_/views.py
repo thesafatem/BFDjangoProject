@@ -6,15 +6,22 @@ from .models import ChgkUser
 from .serializers import ChgkUserSerializer, ChgkUserRegistrationSerializer
 from tournament.serializers import ApplicationSerializer, RegularSerializer
 from tournament.models import Application, Regular
+
+import logging
+logger = logging.getLogger('auth_')
 # Create your views here.
 
 
 class ChgkUserViewSet(viewsets.ViewSet):
+    permission_classes_by_action = {'delete': [IsAuthenticated]}
+
     def create(self, request):
         serializer = ChgkUserRegistrationSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f'User (id = {serializer.data["id"]}, email = {serializer.data["email"]}) created')
             return Response(serializer.data)
+        logger.info(serializer.errors)
         return Response(serializer.errors, status=400)
 
     def list(self, request):
@@ -45,3 +52,10 @@ class ProfileViewSet(viewsets.ViewSet):
         y = user_serializer.data
         y['files'] = [x['question_file'] for x in sync_serializer.data]
         return Response(y)
+
+    def delete(self, request):
+        user = request.user
+        id = user.id
+        user.delete()
+        logger.info(f'User (id = {id}) deleted')
+        return Response(status=204)

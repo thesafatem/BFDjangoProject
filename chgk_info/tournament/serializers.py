@@ -25,6 +25,7 @@ class TournamentBaseModelSerializer(serializers.ModelSerializer):
 
 
 class RegularSerializer(TournamentBaseModelSerializer):
+
     class Meta:
         model = Regular
         validators = []

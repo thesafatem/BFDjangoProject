@@ -4,6 +4,8 @@ from rest_framework.response import Response
 from .models import Player
 from .serializers import PlayerSerializer, PlayerCreateSerializer
 
+import logging
+logger = logging.getLogger('player')
 # Create your views here.
 
 
@@ -17,7 +19,10 @@ class PlayerListView(APIView):
         serializer = PlayerCreateSerializer(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            logger.info(f'Player (id = {serializer.data["id"]}) created')
             return Response(serializer.data)
+        logger.info(serializer.errors)
+        return Response(serializer.errors, status=400)
 
 
 class PlayerDetailView(APIView):
@@ -30,5 +35,7 @@ class PlayerDetailView(APIView):
     def delete(self, request, pk):
         queryset = Player.objects.all()
         player = get_object_or_404(queryset, pk=pk)
+        id = player.id
         player.delete()
+        logger.info(f'Player (id = {id}) deleted')
         return Response(status=204)

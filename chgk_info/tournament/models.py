@@ -14,6 +14,7 @@ class TournamentBaseModel(models.Model):
     difficulty_level = models.FloatField()
     start_date = models.DateField()
     end_date = models.DateField()
+    posted_by = models.ForeignKey(ChgkUser, on_delete=models.CASCADE, null=True)
     deleted = models.BooleanField(default=False)
 
     objects = TournamentBaseModelManager()
@@ -36,7 +37,6 @@ class Regular(TournamentBaseModel):
 
 class Cup(TournamentBaseModel):
     city = models.ForeignKey(City, on_delete=models.SET_NULL, null=True)
-    posted_by = models.ForeignKey(ChgkUser, on_delete=models.CASCADE, null=True)
 
     class Meta:
         verbose_name = 'Очник'
