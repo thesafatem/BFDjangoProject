@@ -38,7 +38,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'corsheaders',
-    'main',
+    'auth_',
+    'city',
+    'team',
+    'player',
+    'tournament',
     'rest_framework',
     'rest_framework_jwt'
 ]
@@ -54,7 +58,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-AUTH_USER_MODEL = 'main.ChgkUser'
+AUTH_USER_MODEL = 'auth_.ChgkUser'
 
 CORS_ALLOW_ALL_ORIGINS = True
 
