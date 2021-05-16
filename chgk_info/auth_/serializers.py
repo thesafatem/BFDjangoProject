@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import ChgkUser
-from player.serializers import PlayerSerializer
+from player.serializers import PlayerNestedSerializer
 
 
 class ChgkUserRegistrationSerializer(serializers.ModelSerializer):
@@ -25,7 +25,7 @@ class ChgkUserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class ChgkUserSerializer(serializers.ModelSerializer):
-    profile = PlayerSerializer()
+    profile = PlayerNestedSerializer()
 
     class Meta:
         model = ChgkUser

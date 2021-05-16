@@ -1,4 +1,7 @@
 from rest_framework import serializers
+
+# from player.serializers import DemoPlayerSerializer
+import player.serializers
 from .models import TournamentBaseModel, Regular, Cup, TournamentCompetitorsPlayers, \
     TournamentCompetitorsTeams, Application
 from team.serializers import TeamBaseSerializer
@@ -24,6 +27,12 @@ class TournamentBaseModelSerializer(serializers.ModelSerializer):
         exclude = ['deleted']
 
 
+class TournamentSimpleSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TournamentBaseModel
+        fields = ['name']
+
+
 class RegularSerializer(TournamentBaseModelSerializer):
 
     class Meta:
@@ -40,17 +49,34 @@ class CupSerializer(TournamentBaseModelSerializer):
 
 
 class TournamentCompetitorsPlayersSerializer(serializers.ModelSerializer):
+    tournament_team = serializers.RelatedField(read_only=True)
+
+    def to_representation(self, instance):  # problem with not json serializable
+        return player.serializers.DemoPlayerSerializer(instance.player).data
+
     class Meta:
         model = TournamentCompetitorsPlayers
-        fields = '__all__'
+        fields = ('tournament_team', 'player')
+
+
+class TCPSerializer(serializers.ModelSerializer):
+    player = serializers.RelatedField(read_only=True)
+
+    def to_representation(self, instance):
+        return TournamentSimpleSerializer(instance.tournament_team.tournament).data
+
+    class Meta:
+        model = TournamentCompetitorsPlayers
+        fields = ('tournament_team', 'player')
 
 
 class TournamentCompetitorsTeamsSerializer(serializers.ModelSerializer):
     team = TeamBaseSerializer()
+    players = TournamentCompetitorsPlayersSerializer(read_only=True, many=True)
 
     class Meta:
         model = TournamentCompetitorsTeams
-        exclude = ['id']
+        fields = ('tournament', 'team', 'alias_name', 'results', 'players')
 
 
 class ApplicationSerializer(serializers.ModelSerializer):

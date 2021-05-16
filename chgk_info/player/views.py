@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import Player
-from .serializers import PlayerSerializer, PlayerCreateSerializer
+from .serializers import PlayerNestedSerializer, PlayerCreateSerializer, PlayerShowSerializer
 
 import logging
 logger = logging.getLogger('player')
@@ -12,7 +12,7 @@ logger = logging.getLogger('player')
 class PlayerListView(APIView):
     def get(self, request):
         players = Player.objects.all()
-        serializer = PlayerSerializer(players, many=True)
+        serializer = PlayerNestedSerializer(players, many=True)
         return Response(serializer.data)
 
     def post(self, request):
@@ -29,7 +29,7 @@ class PlayerDetailView(APIView):
     def get(self, request, pk):
         queryset = Player.objects.all()
         player = get_object_or_404(queryset, pk=pk)
-        serializer = PlayerSerializer(player)
+        serializer = PlayerShowSerializer(player)
         return Response(serializer.data)
 
     def delete(self, request, pk):

@@ -60,8 +60,8 @@ class TournamentCompetitorsTeams(models.Model):
 
 
 class TournamentCompetitorsPlayers(models.Model):
-    tournament_team = models.ForeignKey(TournamentCompetitorsTeams, on_delete=models.CASCADE)
-    player = models.ForeignKey(Player, on_delete=models.CASCADE)
+    tournament_team = models.ForeignKey(TournamentCompetitorsTeams, on_delete=models.CASCADE, related_name='players')
+    player = models.ForeignKey(Player, on_delete=models.CASCADE, related_name='tournaments')
 
     class Meta:
         verbose_name = 'Игрок-участник'
