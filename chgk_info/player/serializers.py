@@ -24,7 +24,7 @@ class PlayerNestedSerializer(PlayerCreateSerializer):
 
 
 class PlayerShowSerializer(PlayerNestedSerializer):
-    tournaments = tournament.serializers.TCPSerializer(read_only=True, many=True)
+    tournaments = tournament.serializers.TCPTournamentsListSerializer(read_only=True, many=True)
 
     class Meta(PlayerNestedSerializer.Meta):
         fields = PlayerNestedSerializer.Meta.fields + ['tournaments']

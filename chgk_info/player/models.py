@@ -14,7 +14,7 @@ class Player(models.Model):
     class Meta:
         verbose_name = 'Игрок'
         verbose_name_plural = 'Игроки'
-        ordering = ['first_name', 'last_name']
+        ordering = ['rating', 'first_name', 'last_name']
 
     def __str__(self):
         return self.first_name + ' ' + self.last_name
